@@ -1,59 +1,279 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Laravel-12-red?logo=laravel" alt="Laravel 12">
+    <img src="https://img.shields.io/badge/PHP-8.2-777BB4?logo=php" alt="PHP 8.2">
+    <img src="https://img.shields.io/badge/TailwindCSS-v4-06B6D4?logo=tailwindcss" alt="TailwindCSS v4">
+    <img src="https://img.shields.io/badge/WebSocket-Reverb-FF6B6B" alt="Reverb WebSocket">
+  </a>
 </p>
 
-## About Laravel
+# RuangPustakawan
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Komunitas Digital Pustakawan Perpustakaan Ibrahimy** — Sebuah platform sosial media mikro berbasis web untuk para pustakawan agar dapat berbagi ilmu, karya, berdiskusi, dan saling terhubung dalam satu ekosistem digital.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Fitur
 
-## Learning Laravel
+### 🔐 Autentikasi
+- Registrasi & login dengan username atau email
+- Rate limiting pada halaman login & register (cegah brute force)
+- Session regeneration setelah login
+- Logout (invalidate session)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 📝 Postingan (Feed)
+- Buat postingan dengan teks, gambar, dan video
+- Kompresi gambar otomatis di sisi klien sebelum upload
+- Edit & hapus postingan (pemilik + admin)
+- Like/unlike postingan (real-time tanpa reload)
+- Komentar pada postingan
+- Pagination dengan infinite scroll + tombol "Muat Lebih Banyak"
+- Skeleton loading saat memuat data
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 👥 Profil Pengguna
+- Halaman profil publik dengan avatar, bio, dan statistik
+- Edit profil (nama, username, bio, password, avatar)
+- Follow/unfollow pengguna lain
+- Upload avatar dengan preview & kompresi
+- Validasi username (hanya huruf kecil, angka, underscore)
 
-## Laravel Sponsors
+### 🔍 Pencarian
+- Pencarian real-time pengguna (minimum 2 karakter)
+- Dropdown hasil pencarian di navbar
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 💬 Pesan Pribadi (Real-time Chat)
+- Kirim pesan teks & gambar antar pengguna
+- Read receipts (tandai sudah dibaca)
+- Online/offline status (WebSocket + polling fallback)
+- Typing indicator
+- Daftar percakapan dengan unread count
+- Load more pesan lama (pagination)
+- Notifikasi pesan baru via WebSocket
 
-### Premium Partners
+### 🔔 Notifikasi Real-time
+- Notifikasi like, comment, follow, dan pesan baru
+- Broadcast via WebSocket (Laravel Echo + Pusher/Reverb)
+- Dropdown notifikasi di navbar
+- Unread count badge
+- Mark all as read
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 🌙 Dark Mode
+- Toggle tema terang/gelap
+- Persisted di localStorage
+- Diperbarui secara real-time via Alpine.js
 
-## Contributing
+### 🎨 UI/UX
+- Desain glassmorphism modern
+- Animasi smooth
+- Kompresi gambar client-side
+- Toast notification system
+- SweetAlert2 untuk konfirmasi aksi
+- Fully responsive (mobile-first)
+- Footer dengan kontak & informasi
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## Tech Stack
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Layer | Teknologi |
+|-------|-----------|
+| **Backend** | Laravel 12, PHP 8.2 |
+| **Frontend** | Bootstrap 5.1, Alpine.js, Vanilla JS, Font Awesome 6 |
+| **Database** | MySQL (default), SQLite fallback |
+| **Realtime** | Laravel Reverb + Pusher, Laravel Echo |
+| **Build** | Vite 7, TailwindCSS v4 |
+| **Queue** | Database driver |
+| **Session/Cache** | Database driver |
 
-## Security Vulnerabilities
+### Package Utama (Composer)
+- `laravel/framework` ^12.0
+- `laravel/reverb` ^1.10 — WebSocket server
+- `pusher/pusher-php-server` ^7.2 — Pusher integration
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Package Frontend (NPM)
+- `laravel-echo` ^2.3.7 — WebSocket client
+- `pusher-js` ^8.5.0 — Pusher JS client
+- `alpinejs` ^3.14.8 — Reactive UI components
+- `@tailwindcss/vite` v4 — CSS framework (terintegrasi Vite)
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Entity Relationship
+
+### Models
+
+| Model     | Relasi Utama                                           |
+|-----------|--------------------------------------------------------|
+| **User**  | `hasMany` Post, Like, Comment, Notification; Followers/Following via `Follow` |
+| **Post**  | `belongsTo` User; `hasMany` Like, Comment              |
+| **Comment** | `belongsTo` User, Post                               |
+| **Like**  | `belongsTo` User, Post                                  |
+| **Follow** | `belongsTo` User (follower & following)               |
+| **Message** | `belongsTo` User (sender & receiver)                 |
+| **Notification** | `belongsTo` User, fromUser, Post (opsional)       |
+
+### Database Tables
+- `users` — username, email, password, fullname, bio, avatar, role, last_seen_at
+- `posts` — user_id, content, image, video, timestamps
+- `likes` — user_id, post_id (unique pair)
+- `comments` — user_id, post_id, comment, created_at
+- `follows` — follower_id, following_id (unique pair)
+- `messages` — sender_id, receiver_id, message, image, is_read, read_at
+- `notifications` — user_id, from_user_id, type, post_id, is_read
+
+---
+
+## Route Structure
+
+### Guest Routes
+| Method | URI | Controller |
+|--------|-----|------------|
+| GET    | `/login` | AuthController@showLogin |
+| POST   | `/login` | AuthController@login |
+| GET    | `/register` | AuthController@showRegister |
+| POST   | `/register` | AuthController@register |
+
+### Authenticated Routes
+| Method | URI | Controller |
+|--------|-----|------------|
+| GET/POST | `/` | HomeController@index (feed + create post) |
+| POST | `/logout` | AuthController@logout |
+| GET/POST | `/profile` | ProfileController@show / update |
+| POST | `/like` | LikeController@toggle |
+| POST | `/comment` | CommentController@store |
+| GET | `/comment` | CommentController@index |
+| POST | `/follow` | FollowController@toggle |
+| POST | `/edt_post` | PostController@update |
+| POST | `/delete_post` | PostController@destroy |
+| GET | `/search` | SearchController@search |
+| GET/POST | `/notifications` | NotificationController@handle |
+| GET | `/messages` | MessageController@index |
+| GET | `/messages/{user}` | MessageController@show |
+| GET | `/messages/fetch/{user}` | MessageController@fetch |
+| POST | `/messages/send` | MessageController@store |
+| GET | `/messages/unread/count` | MessageController@unreadCount |
+| GET | `/messages/api/conversations` | MessageController@conversations |
+| POST | `/messages/mark-read/{user}` | MessageController@markRead |
+| GET | `/messages/status/{user}` | MessageController@status |
+| GET/POST | `/messages/typing/{user}` | MessageController@checkTyping/typing |
+
+### WebSocket Channels
+| Channel | Tipe | Deskripsi |
+|---------|------|-----------|
+| `private-App.Models.User.{id}` | Private | Notifikasi per-user |
+| `private-notifications.{id}` | Private | Notifikasi real-time |
+| `private-messages.{id}` | Private | Pesan real-time |
+| `presence-online` | Presence | Status online pengguna |
+
+---
+
+## Instalasi & Setup
+
+```bash
+# Clone repositori
+git clone <repo-url>
+cd ruang-pustakawan
+
+# Setup environment
+copy .env.example .env
+# Edit .env — atur DB_DATABASE, DB_USERNAME, DB_PASSWORD, BROADCAST_DRIVER
+
+# Install dependencies & migrate
+composer install
+npm install
+php artisan key:generate
+php artisan migrate --seed
+
+# Build frontend
+npm run build
+
+# Jalankan development server
+composer run dev
+# atau manual:
+php artisan serve
+php artisan queue:listen --tries=1
+php artisan reverb:start
+npm run dev
+```
+
+### Script `composer run dev`
+Menjalankan 4 proses concurrently:
+| Proses | Port | Deskripsi |
+|--------|------|-----------|
+| `php artisan serve` | 8000 | Web server |
+| `php artisan queue:listen` | — | Queue worker |
+| `php artisan pail` | — | Log viewer |
+| `npm run dev` | 5173 | Vite HMR |
+
+---
+
+## Broadcasting (Realtime)
+
+Aplikasi mendukung dua driver broadcasting:
+
+### 1. Laravel Reverb (self-hosted)
+```env
+BROADCAST_CONNECTION=reverb
+REVERB_APP_ID=...
+REVERB_APP_KEY=...
+REVERB_APP_SECRET=...
+```
+
+### 2. Pusher (cloud)
+```env
+BROADCAST_CONNECTION=pusher
+PUSHER_APP_ID=...
+PUSHER_APP_KEY=...
+PUSHER_APP_SECRET=...
+PUSHER_CLUSTER=...
+```
+
+---
+
+## Struktur Direktori
+
+```
+ruang-pustakawan/
+├── app/
+│   ├── Events/              # NewMessage, NewNotification
+│   ├── Http/
+│   │   ├── Controllers/     # 10 controller
+│   │   └── Middleware/      # UpdateUserActivity
+│   ├── Models/              # 7 model (User, Post, Comment, etc.)
+│   └── Providers/
+├── database/
+│   ├── migrations/          # 7 migration files
+│   └── seeders/
+├── resources/
+│   └── views/
+│       ├── auth/            # login, register
+│       ├── layouts/         # app.blade.php (main layout)
+│       ├── messages/        # index, show (chat)
+│       └── partials/        # post component
+├── public/
+│   └── assets/
+│       ├── avatars/         # user avatar uploads
+│       ├── css/             # style.css
+│       ├── js/              # app.js (851 lines)
+│       └── uploads/         # post image/video & chat image uploads
+├── routes/
+│   ├── web.php              # 25+ routes
+│   ├── channels.php         # WebSocket channel authorization
+│   └── console.php
+└── config/                  # 12 config files
+```
+
+---
+
+## Developer
+
+**Perpustakaan Ibrahimy** — Platform dikembangkan oleh tim Perpustakaan Ibrahimy untuk memfasilitasi komunikasi dan kolaborasi antar pustakawan.
+
+- ✉️ aubaidillah756@gmail.com
+- 📱 +62 851-1166-1997
+
+---
+
+## Lisensi
+
+MIT License — lihat file [LICENSE](LICENSE) untuk detail.
