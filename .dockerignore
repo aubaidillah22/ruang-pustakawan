@@ -1,0 +1,10 @@
+.git
+vendor
+node_modules
+storage/app
+storage/logs
+storage/framework/cache/data
+.env
+.DS_Store
+docker-compose.yml
+*.md
