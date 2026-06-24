@@ -11,12 +11,10 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->text('content');
+            $table->text('content')->nullable();
             $table->string('image', 255)->nullable();
+            $table->string('video', 255)->nullable();
             $table->timestamps();
-
-            $table->index('user_id');
-            $table->index('created_at');
         });
     }
 

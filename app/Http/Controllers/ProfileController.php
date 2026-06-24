@@ -2,94 +2,95 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Follow;
-use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 
 class ProfileController extends Controller
 {
-    public function show(Request $request)
+    public function show(?User $user = null)
     {
         $currentUser = Auth::user();
-        $viewUserId = $request->get('id') ? (int) $request->get('id') : $currentUser->id;
-        $isOwnProfile = ($viewUserId === (int) $currentUser->id);
+        $profileUser = $user ?: $currentUser;
 
-        $profileUser = User::findOrFail($viewUserId);
+        $isOwnProfile = $profileUser->id === $currentUser->id;
+        $isFollowing = $isOwnProfile ? false : $profileUser->isFollowedBy($currentUser);
 
-        // Fetch user's posts with counts
-        $myPosts = Post::with('user')
+        $posts = $profileUser->posts()
             ->withCount(['likes', 'comments'])
-            ->where('user_id', $viewUserId)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(20);
 
-        $totalLikes = $myPosts->sum('likes_count');
-        $totalPosts = $myPosts->count();
+        $posts->getCollection()->transform(function ($post) use ($currentUser) {
+            $post->is_liked = $post->isLikedBy($currentUser);
+            return $post;
+        });
 
-        // Follower/following counts
-        $followersCount = Follow::where('following_id', $viewUserId)->count();
-        $followingCount = Follow::where('follower_id', $viewUserId)->count();
-
-        // Check if current user follows this profile
-        $isFollowing = false;
-        if (!$isOwnProfile) {
-            $isFollowing = $currentUser->isFollowing($viewUserId);
-        }
-
-        return view('profile', compact(
-            'currentUser', 'profileUser', 'myPosts', 'totalLikes', 'totalPosts',
-            'followersCount', 'followingCount', 'isFollowing', 'isOwnProfile'
-        ));
+        return Inertia::render('Profile/Show', [
+            'profileUser' => $profileUser->loadCount(['posts', 'followers', 'following' => function ($q) {
+                $q->where('follower_id', Auth::id());
+            }]),
+            'isOwnProfile' => $isOwnProfile,
+            'isFollowing' => $isFollowing,
+            'posts' => $posts->items(),
+            'hasMorePosts' => $posts->hasMorePages(),
+        ]);
     }
 
     public function update(Request $request)
     {
-        $currentUser = Auth::user();
+        $user = Auth::user();
 
-        $rules = [
+        $request->validate([
             'fullname' => 'required|string|max:100',
-            'bio' => 'nullable|string',
-            'username' => 'nullable|string|min:3|max:50|regex:/^[a-z0-9_]+$/|unique:users,username,' . $currentUser->id,
-            'current_password' => 'nullable|required_with:new_password|current_password',
-            'new_password' => 'nullable|min:8|confirmed',
-        ];
+            'username' => 'required|string|max:50|regex:/^[a-z0-9_]+$/|unique:users,username,' . $user->id,
+            'bio' => 'nullable|string|max:500',
+            'email' => 'required|email|max:100|unique:users,email,' . $user->id,
+        ], [
+            'username.regex' => 'Username hanya boleh huruf kecil, angka, dan underscore!',
+        ]);
 
-        $messages = [
-            'username.regex' => 'Username hanya boleh huruf kecil, angka, dan underscore',
-            'username.unique' => 'Username sudah digunakan',
-            'current_password.current_password' => 'Password saat ini tidak cocok',
-            'new_password.confirmed' => 'Konfirmasi password tidak cocok',
-            'new_password.min' => 'Password minimal 8 karakter',
-        ];
+        $user->update([
+            'fullname' => trim($request->fullname),
+            'username' => strtolower(trim($request->username)),
+            'bio' => trim($request->bio ?? ''),
+            'email' => trim($request->email),
+        ]);
 
-        $request->validate($rules, $messages);
+        if ($request->filled('current_password') && $request->filled('new_password')) {
+            $request->validate([
+                'current_password' => 'required|current_password',
+                'new_password' => 'required|string|min:8|confirmed',
+            ]);
 
-        $currentUser->fullname = trim($request->fullname);
-        $currentUser->bio = trim($request->bio ?? '');
-
-        if ($request->filled('username')) {
-            $currentUser->username = trim($request->username);
+            $user->update([
+                'password' => Hash::make($request->new_password),
+            ]);
         }
 
-        if ($request->filled('new_password')) {
-            $currentUser->password = bcrypt($request->new_password);
+        return back()->with('success', 'Profile updated!');
+    }
+
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:5120',
+        ]);
+
+        $user = Auth::user();
+        $file = $request->file('avatar');
+        $filename = 'avatar_' . $user->id . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('assets/avatars'), $filename);
+
+        // Delete old avatar
+        if ($user->avatar && $user->avatar !== 'default.svg' && file_exists(public_path('assets/avatars/' . $user->avatar))) {
+            unlink(public_path('assets/avatars/' . $user->avatar));
         }
 
-        // Handle avatar upload
-        if ($request->hasFile('avatar')) {
-            $file = $request->file('avatar');
-            $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-            if (in_array($file->getClientOriginalExtension(), $allowed)) {
-                $filename = 'avatar_' . $currentUser->id . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('assets/avatars'), $filename);
-                $currentUser->avatar = $filename;
-            }
-        }
+        $user->update(['avatar' => $filename]);
 
-        $currentUser->save();
-
-        return redirect()->route('profile')->with('success', 'Profil berhasil diperbarui');
+        return back()->with('success', 'Avatar updated!');
     }
 }

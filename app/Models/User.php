@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use Notifiable;
 
     protected $fillable = [
         'username',
@@ -18,6 +18,7 @@ class User extends Authenticatable
         'bio',
         'avatar',
         'role',
+        'last_seen_at',
     ];
 
     protected $hidden = [
@@ -28,10 +29,13 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'email_verified_at' => 'datetime',
+            'last_seen_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
 
+    // Relationships
     public function posts()
     {
         return $this->hasMany(Post::class);
@@ -57,40 +61,54 @@ class User extends Authenticatable
         return $this->hasMany(Follow::class, 'follower_id');
     }
 
+    public function sentMessages()
+    {
+        return $this->hasMany(ChatMessage::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(ChatMessage::class, 'receiver_id');
+    }
+
     public function notifications()
     {
         return $this->hasMany(Notification::class);
     }
 
-    public function isOnline(): bool
+    // Accessors
+    public function getFollowersCountAttribute()
     {
-        return $this->last_seen_at && \Carbon\Carbon::parse($this->last_seen_at)->diffInMinutes(now()) < 5;
+        return $this->followers()->count();
     }
 
-    public function isFollowing(int $userId): bool
+    public function getFollowingCountAttribute()
     {
-        return Follow::where('follower_id', $this->id)
-            ->where('following_id', $userId)
+        return $this->following()->count();
+    }
+
+    public function getPostsCountAttribute()
+    {
+        return $this->posts()->count();
+    }
+
+    public function getAvatarUrlAttribute()
+    {
+        return $this->avatar
+            ? asset('assets/avatars/' . $this->avatar)
+            : asset('assets/avatars/default.svg');
+    }
+
+    public function isOnline()
+    {
+        if (!$this->last_seen_at) return false;
+        return $this->last_seen_at->gt(now()->subMinutes(5));
+    }
+
+    public function isFollowedBy(User $user)
+    {
+        return Follow::where('follower_id', $user->id)
+            ->where('following_id', $this->id)
             ->exists();
-    }
-
-    public function hasLiked(int $postId): bool
-    {
-        return Like::where('user_id', $this->id)
-            ->where('post_id', $postId)
-            ->exists();
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    public function getAvatarUrlAttribute(): string
-    {
-        if (empty($this->avatar) || $this->avatar === 'default.svg') {
-            return asset('assets/avatars/default.svg');
-        }
-        return asset('assets/avatars/' . $this->avatar);
     }
 }

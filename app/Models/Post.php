@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'content',
+        'image',
+        'video',
+    ];
 
-    protected $fillable = ['user_id', 'content', 'image', 'video'];
-
+    // Relationships
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -26,13 +29,29 @@ class Post extends Model
         return $this->hasMany(Comment::class);
     }
 
-    public function likesCount(): int
+    // Accessors
+    public function getLikesCountAttribute()
     {
         return $this->likes()->count();
     }
 
-    public function commentsCount(): int
+    public function getCommentsCountAttribute()
     {
         return $this->comments()->count();
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? asset($this->image) : null;
+    }
+
+    public function getVideoUrlAttribute()
+    {
+        return $this->video ? asset($this->video) : null;
+    }
+
+    public function isLikedBy(User $user)
+    {
+        return $this->likes()->where('user_id', $user->id)->exists();
     }
 }

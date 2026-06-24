@@ -6,22 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    public $timestamps = false;
-
-    protected $fillable = ['user_id', 'from_user_id', 'type', 'post_id', 'is_read', 'created_at'];
-
-    protected $appends = ['message'];
-
-    protected $casts = [
-        'is_read' => 'boolean',
+    protected $fillable = [
+        'user_id',
+        'from_user_id',
+        'type',
+        'post_id',
+        'message',
+        'is_read',
     ];
 
-    protected static function boot()
+    protected function casts(): array
     {
-        parent::boot();
-        static::creating(function ($notification) {
-            $notification->created_at = now();
-        });
+        return [
+            'is_read' => 'boolean',
+        ];
     }
 
     public function user()
@@ -37,16 +35,5 @@ class Notification extends Model
     public function post()
     {
         return $this->belongsTo(Post::class);
-    }
-
-    public function getMessageAttribute(): string
-    {
-        return match ($this->type) {
-            'like' => 'menyukai postingan Anda',
-            'comment' => 'mengomentari postingan Anda',
-            'follow' => 'mulai mengikuti Anda',
-            'message' => 'mengirimi Anda pesan',
-            default => 'berinteraksi dengan Anda',
-        };
     }
 }

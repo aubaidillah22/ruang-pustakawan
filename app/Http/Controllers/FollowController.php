@@ -13,15 +13,13 @@ class FollowController extends Controller
 {
     public function toggle(Request $request)
     {
+        $request->validate(['user_id' => 'required|exists:users,id']);
+
         $followerId = Auth::id();
-        $followingId = $request->user_id ?? 0;
+        $followingId = $request->user_id;
 
-        if (!$followingId || $followingId == $followerId) {
-            return response()->json(['success' => false, 'message' => 'Invalid user']);
-        }
-
-        if (!User::find($followingId)) {
-            return response()->json(['success' => false, 'message' => 'User not found']);
+        if ($followingId == $followerId) {
+            return response()->json(['success' => false, 'message' => 'Cannot follow yourself']);
         }
 
         $existing = Follow::where('follower_id', $followerId)
@@ -38,15 +36,26 @@ class FollowController extends Controller
             ]);
             $following = true;
 
-            // Create notification
+            // Send notification
             $notification = Notification::create([
                 'user_id' => $followingId,
                 'from_user_id' => $followerId,
                 'type' => 'follow',
             ]);
-            try { broadcast(new NewNotification($notification)); } catch (\Throwable $e) { }
+            try { broadcast(new NewNotification($notification)); } catch (\Throwable $e) {}
         }
 
         return response()->json(['success' => true, 'following' => $following]);
+    }
+
+    public function status(Request $request)
+    {
+        $request->validate(['user_id' => 'required|exists:users,id']);
+
+        $isFollowing = Follow::where('follower_id', Auth::id())
+            ->where('following_id', $request->user_id)
+            ->exists();
+
+        return response()->json(['following' => $isFollowing]);
     }
 }

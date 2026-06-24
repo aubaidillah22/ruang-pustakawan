@@ -14,7 +14,7 @@ class LikeController extends Controller
     public function toggle(Request $request)
     {
         $userId = Auth::id();
-        $postId = $request->post_id ?? 0;
+        $postId = $request->post_id;
 
         if (!$postId) {
             return response()->json(['success' => false, 'message' => 'No post ID']);
@@ -29,7 +29,7 @@ class LikeController extends Controller
             Like::create(['user_id' => $userId, 'post_id' => $postId]);
             $liked = true;
 
-            // Create notification for post owner
+            // Send notification to post owner
             $post = Post::find($postId);
             if ($post && $post->user_id != $userId) {
                 $notification = Notification::create([
@@ -38,7 +38,7 @@ class LikeController extends Controller
                     'type' => 'like',
                     'post_id' => $postId,
                 ]);
-                try { broadcast(new NewNotification($notification)); } catch (\Throwable $e) { }
+                try { broadcast(new NewNotification($notification)); } catch (\Throwable $e) {}
             }
         }
 

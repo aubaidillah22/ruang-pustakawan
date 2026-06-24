@@ -6,17 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    public $timestamps = false;
-
-    protected $fillable = ['user_id', 'post_id', 'comment', 'created_at'];
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($comment) {
-            $comment->created_at = now();
-        });
-    }
+    protected $fillable = [
+        'user_id',
+        'post_id',
+        'parent_id',
+        'comment',
+    ];
 
     public function user()
     {
@@ -26,5 +21,15 @@ class Comment extends Model
     public function post()
     {
         return $this->belongsTo(Post::class);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Comment::class, 'parent_id');
     }
 }

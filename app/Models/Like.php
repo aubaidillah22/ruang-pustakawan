@@ -6,17 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Like extends Model
 {
-    public $timestamps = false;
-
-    protected $fillable = ['user_id', 'post_id', 'created_at'];
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($like) {
-            $like->created_at = now();
-        });
-    }
+    protected $fillable = [
+        'user_id',
+        'post_id',
+    ];
 
     public function user()
     {

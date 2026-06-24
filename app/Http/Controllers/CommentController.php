@@ -6,7 +6,6 @@ use App\Events\NewNotification;
 use App\Models\Comment;
 use App\Models\Notification;
 use App\Models\Post;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,49 +14,58 @@ class CommentController extends Controller
     public function store(Request $request)
     {
         $userId = Auth::id();
-        $postId = $request->post_id ?? 0;
-        $comment = trim($request->comment ?? '');
 
-        if (empty($comment)) {
-            return response()->json(['success' => false, 'message' => 'Comment is empty']);
-        }
-
-        $success = Comment::create([
-            'user_id' => $userId,
-            'post_id' => $postId,
-            'comment' => $comment,
+        $request->validate([
+            'post_id' => 'required|exists:posts,id',
+            'comment' => 'required|string|max:5000',
+            'parent_id' => 'nullable|exists:comments,id',
         ]);
 
-        // Create notification for post owner
-        if ($success) {
-            $post = Post::find($postId);
-            if ($post && $post->user_id != $userId) {
-                $notification = Notification::create([
-                    'user_id' => $post->user_id,
-                    'from_user_id' => $userId,
-                    'type' => 'comment',
-                    'post_id' => $postId,
-                ]);
-                try { broadcast(new NewNotification($notification)); } catch (\Throwable $e) { }
-            }
+        $comment = Comment::create([
+            'user_id' => $userId,
+            'post_id' => $request->post_id,
+            'parent_id' => $request->parent_id,
+            'comment' => trim($request->comment),
+        ]);
+
+        // Send notification to post owner
+        $post = Post::find($request->post_id);
+        if ($post && $post->user_id != $userId) {
+            $notification = Notification::create([
+                'user_id' => $post->user_id,
+                'from_user_id' => $userId,
+                'type' => 'comment',
+                'post_id' => $request->post_id,
+            ]);
+            try { broadcast(new NewNotification($notification)); } catch (\Throwable $e) {}
         }
 
-        return response()->json(['success' => (bool) $success]);
+        return response()->json([
+            'success' => true,
+            'comment' => $comment->load('user'),
+        ]);
     }
 
     public function index(Request $request)
     {
-        $postId = $request->get('post_id', 0);
+        $request->validate(['post_id' => 'required|exists:posts,id']);
 
         $comments = Comment::with('user')
-            ->where('post_id', $postId)
+            ->where('post_id', $request->post_id)
+            ->whereNull('parent_id')
             ->orderBy('created_at', 'asc')
             ->get()
-            ->map(function ($c) {
-                $c->time_ago = $this->timeAgo($c->created_at);
-                $c->avatar = $c->user->avatar ?? 'default.svg';
-                $c->fullname = $c->user->fullname;
-                return $c;
+            ->map(function ($comment) {
+                $comment->time_ago = $this->timeAgo($comment->created_at);
+                $comment->replies = Comment::with('user')
+                    ->where('parent_id', $comment->id)
+                    ->orderBy('created_at', 'asc')
+                    ->get()
+                    ->map(function ($reply) {
+                        $reply->time_ago = $this->timeAgo($reply->created_at);
+                        return $reply;
+                    });
+                return $comment;
             });
 
         return response()->json($comments);
@@ -65,17 +73,17 @@ class CommentController extends Controller
 
     private function timeAgo($timestamp): string
     {
-        if (!$timestamp) return "Baru saja";
-        $now = Carbon::now('Asia/Jakarta');
-        $time = Carbon::parse($timestamp);
+        if (!$timestamp) return 'Baru saja';
+        $now = now();
+        $time = $timestamp;
         $diffMinutes = (int) $now->diffInMinutes($time);
         $diffHours = (int) $now->diffInHours($time);
         $diffDays = (int) $now->diffInDays($time);
 
-        if ($diffMinutes < 1) return "Baru saja";
-        if ($diffMinutes < 60) return $diffMinutes . " menit lalu";
-        if ($diffHours < 24) return $diffHours . " jam lalu";
-        if ($diffDays < 7) return $diffDays . " hari lalu";
+        if ($diffMinutes < 1) return 'Baru saja';
+        if ($diffMinutes < 60) return $diffMinutes . ' menit lalu';
+        if ($diffHours < 24) return $diffHours . ' jam lalu';
+        if ($diffDays < 7) return $diffDays . ' hari lalu';
         return $time->format('d M Y');
     }
 }

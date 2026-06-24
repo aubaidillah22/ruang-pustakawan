@@ -1,66 +1,70 @@
 <?php
 
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FollowController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-// Guest routes
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
-});
+// Guest / Welcome page
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('feed');
+    }
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('home');
 
 // Authenticated routes
-Route::middleware('auth')->group(function () {
-    // Home / Feed
-    Route::match(['get', 'post'], '/', [HomeController::class, 'index'])->name('home');
+Route::middleware(['auth', 'verified', 'active'])->group(function () {
+    // Feed
+    Route::get('/feed', [PostController::class, 'index'])->name('feed');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::post('/posts/update', [PostController::class, 'update'])->name('posts.update');
+    Route::post('/posts/delete', [PostController::class, 'destroy'])->name('posts.destroy');
 
-    // Logout
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
-    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    // Like (AJAX)
+    // Likes
     Route::post('/like', [LikeController::class, 'toggle'])->name('like.toggle');
 
-    // Comments (AJAX)
-    Route::post('/comment', [CommentController::class, 'store'])->name('comment.store');
-    Route::get('/comment', [CommentController::class, 'index'])->name('comment.index');
+    // Comments
+    Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
 
-    // Follow (AJAX)
+    // Follow
     Route::post('/follow', [FollowController::class, 'toggle'])->name('follow.toggle');
+    Route::get('/follow/status', [FollowController::class, 'status'])->name('follow.status');
 
-    // Post edit/delete (AJAX)
-    Route::post('/edt_post', [PostController::class, 'update'])->name('post.update');
-    Route::post('/delete_post', [PostController::class, 'destroy'])->name('post.destroy');
-
-    // Search (AJAX)
+    // Search
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 
-    // Notifications (AJAX)
-    Route::match(['get', 'post'], '/notifications', [NotificationController::class, 'handle'])->name('notifications');
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
+    Route::get('/notifications/latest', [NotificationController::class, 'latest'])->name('notifications.latest');
 
-    // Messaging
+    // Messages (Chat)
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{user}', [MessageController::class, 'show'])->name('messages.show');
-    Route::get('/messages/fetch/{user}', [MessageController::class, 'fetch'])->name('messages.fetch');
     Route::post('/messages/send', [MessageController::class, 'store'])->name('messages.store');
-    Route::get('/messages/unread/count', [MessageController::class, 'unreadCount'])->name('messages.unread');
-    Route::get('/messages/api/conversations', [MessageController::class, 'conversations'])->name('messages.conversations');
+    Route::get('/messages/fetch/{user}', [MessageController::class, 'fetch'])->name('messages.fetch');
     Route::post('/messages/mark-read/{user}', [MessageController::class, 'markRead'])->name('messages.markRead');
-    Route::get('/messages/status/{user}', [MessageController::class, 'status'])->name('messages.status');
-    Route::get('/messages/typing/{user}', [MessageController::class, 'checkTyping'])->name('messages.typing.check');
-    Route::post('/messages/typing/{user}', [MessageController::class, 'typing'])->name('messages.typing');
+    Route::get('/messages/unread/count', [MessageController::class, 'unreadCount'])->name('messages.unreadCount');
+    Route::get('/messages/status/all', [MessageController::class, 'status'])->name('messages.status');
+
+    // Profile
+    Route::get('/profile/{user?}', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])->name('profile.updateAvatar');
 });
+
+// Auth routes (Breeze)
+require __DIR__ . '/auth.php';
