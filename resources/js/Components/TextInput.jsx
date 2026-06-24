@@ -21,14 +21,12 @@ export default forwardRef(function TextInput(
             {...props}
             type={type}
             className={
-                'rounded-md shadow-sm ' +
+                'rounded-xl shadow-sm ' +
+                'bg-[var(--bg-color)] text-[var(--text-primary)] ' +
+                'border border-[var(--border-color)] ' +
+                'focus:border-[var(--primary-light)] focus:ring-2 focus:ring-[var(--primary-light)] focus:ring-opacity-30 focus:outline-none ' +
                 className
             }
-            style={{
-                background: 'var(--bg-color)',
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)',
-            }}
             ref={localRef}
         />
     );

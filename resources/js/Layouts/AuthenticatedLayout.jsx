@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
+import LogoutModal from '@/Components/LogoutModal';
 
 export default function AuthenticatedLayout({ children }) {
     const { auth } = usePage().props;
@@ -14,6 +15,7 @@ export default function AuthenticatedLayout({ children }) {
     );
     const [notifCount, setNotifCount] = useState(0);
     const [msgCount, setMsgCount] = useState(0);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const sidebarWidth = sidebarCollapsed ? '80px' : '280px';
 
@@ -163,7 +165,7 @@ export default function AuthenticatedLayout({ children }) {
                                 <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>{user.fullname}</p>
                                 <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>@{user.username}</p>
                             </div>
-                            <button onClick={() => { if (confirm('Logout?')) router.post(route('logout')); }} 
+                            <button onClick={() => setShowLogoutModal(true)} 
                                     className="p-1.5 rounded-lg btn-icon flex-shrink-0">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -181,6 +183,9 @@ export default function AuthenticatedLayout({ children }) {
                     {children}
                 </div>
             </main>
+
+            {/* Logout Modal */}
+            <LogoutModal show={showLogoutModal} onClose={() => setShowLogoutModal(false)} />
         </div>
     );
 }

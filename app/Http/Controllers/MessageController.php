@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\NewMessage;
 use App\Events\NewNotification;
+use App\Events\UserTyping;
 use App\Models\ChatMessage;
 use App\Models\Notification;
 use App\Models\User;
@@ -42,6 +43,7 @@ class MessageController extends Controller
                 return [
                     'user' => $user,
                     'last_message' => $lastMessage,
+                    'last_message_time' => $lastMessage?->created_at?->diffForHumans(),
                     'unread_count' => $unreadCount,
                     'is_online' => $user->isOnline(),
                 ];
@@ -70,11 +72,14 @@ class MessageController extends Controller
             ->where('is_read', false)
             ->update(['is_read' => true, 'read_at' => now()]);
 
-        $messages = ChatMessage::where(function ($q) use ($currentUser, $user) {
-            $q->where('sender_id', $currentUser->id)->where('receiver_id', $user->id);
-        })->orWhere(function ($q) use ($currentUser, $user) {
-            $q->where('sender_id', $user->id)->where('receiver_id', $currentUser->id);
-        })->with('sender')->orderBy('created_at', 'asc')->get();
+        $messages = ChatMessage::betweenUsers($currentUser->id, $user->id)
+            ->with('sender')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($msg) {
+                $msg->time_ago = $msg->created_at->diffForHumans();
+                return $msg;
+            });
 
         return Inertia::render('Messages/Show', [
             'conversationUser' => $user,
@@ -199,5 +204,58 @@ class MessageController extends Controller
             });
 
         return response()->json($users);
+    }
+
+    public function destroyMessage(Request $request)
+    {
+        $request->validate(['message_id' => 'required|exists:chat_messages,id']);
+
+        $message = ChatMessage::findOrFail($request->message_id);
+
+        if ($message->sender_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        // Delete image file if exists
+        if ($message->image && file_exists(public_path($message->image))) {
+            @unlink(public_path($message->image));
+        }
+
+        $message->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function destroyConversation(User $user)
+    {
+        $currentUser = Auth::user();
+
+        $messages = ChatMessage::where(function ($q) use ($currentUser, $user) {
+            $q->where('sender_id', $currentUser->id)->where('receiver_id', $user->id);
+        })->orWhere(function ($q) use ($currentUser, $user) {
+            $q->where('sender_id', $user->id)->where('receiver_id', $currentUser->id);
+        })->get();
+
+        foreach ($messages as $message) {
+            if ($message->image && file_exists(public_path($message->image))) {
+                @unlink(public_path($message->image));
+            }
+            $message->delete();
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function typing(Request $request)
+    {
+        $request->validate([
+            'receiver_id' => 'required|exists:users,id',
+        ]);
+
+        try {
+            broadcast(new UserTyping(Auth::id(), $request->receiver_id))->toOthers();
+        } catch (\Throwable $e) {}
+
+        return response()->json(['success' => true]);
     }
 }

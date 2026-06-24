@@ -22,7 +22,11 @@ class PostController extends Controller
 
         $posts->getCollection()->transform(function ($post) use ($currentUser) {
             $post->is_liked = $post->isLikedBy($currentUser);
-            $post->can_delete = $post->user_id === $currentUser->id || $currentUser->role === 'admin';
+            $isOwner = $post->user_id === $currentUser->id;
+            $isAdmin = $currentUser->role === 'admin';
+            $post->can_delete = $isOwner || $isAdmin;
+            $post->can_edit = $isOwner || $isAdmin;
+            $post->is_edited = $post->created_at->ne($post->updated_at);
             return $post;
         });
 
@@ -54,7 +58,11 @@ class PostController extends Controller
 
         $posts->getCollection()->transform(function ($post) use ($currentUser) {
             $post->is_liked = $post->isLikedBy($currentUser);
-            $post->can_delete = $post->user_id === $currentUser->id || $currentUser->role === 'admin';
+            $isOwner = $post->user_id === $currentUser->id;
+            $isAdmin = $currentUser->role === 'admin';
+            $post->can_delete = $isOwner || $isAdmin;
+            $post->can_edit = $isOwner || $isAdmin;
+            $post->is_edited = $post->created_at->ne($post->updated_at);
             return $post;
         });
 
@@ -145,7 +153,8 @@ class PostController extends Controller
 
         $post = Post::findOrFail($request->post_id);
 
-        if ($post->user_id !== Auth::id()) {
+        $currentUser = Auth::user();
+        if ($post->user_id !== $currentUser->id && $currentUser->role !== 'admin') {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 

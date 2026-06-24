@@ -40,9 +40,12 @@ class CommentController extends Controller
             try { broadcast(new NewNotification($notification)); } catch (\Throwable $e) {}
         }
 
+        $comment->load('user');
+        $comment->time_ago = $this->timeAgo($comment->created_at);
+
         return response()->json([
             'success' => true,
-            'comment' => $comment->load('user'),
+            'comment' => $comment,
         ]);
     }
 

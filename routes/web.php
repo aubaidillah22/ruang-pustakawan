@@ -53,6 +53,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-read', [NotificationController::class, 'markRead'])->name('notifications.markRead');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
     Route::get('/notifications/latest', [NotificationController::class, 'latest'])->name('notifications.latest');
@@ -65,6 +66,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/messages/mark-read/{user}', [MessageController::class, 'markRead'])->name('messages.markRead');
     Route::get('/messages/unread/count', [MessageController::class, 'unreadCount'])->name('messages.unreadCount');
     Route::get('/messages/status/all', [MessageController::class, 'status'])->name('messages.status');
+    Route::post('/messages/delete', [MessageController::class, 'destroyMessage'])->name('messages.destroy');
+    Route::post('/messages/delete-conversation/{user}', [MessageController::class, 'destroyConversation'])->name('messages.destroyConversation');
+    Route::post('/messages/typing', [MessageController::class, 'typing'])->name('messages.typing');
 
     // Profile
     Route::get('/profile/{user?}', [ProfileController::class, 'show'])->name('profile.show');
