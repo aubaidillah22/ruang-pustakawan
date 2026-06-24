@@ -24,7 +24,7 @@ Route::get('/', function () {
 })->name('home');
 
 // Authenticated routes
-Route::middleware(['auth', 'verified', 'active'])->group(function () {
+Route::middleware(['auth', 'active'])->group(function () {
     // Feed
     Route::get('/feed', [PostController::class, 'index'])->name('feed');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');

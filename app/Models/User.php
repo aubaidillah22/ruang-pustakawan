@@ -21,6 +21,8 @@ class User extends Authenticatable
         'last_seen_at',
     ];
 
+    protected $appends = ['avatar_url', 'is_online'];
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -33,6 +35,11 @@ class User extends Authenticatable
             'last_seen_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'username';
     }
 
     // Relationships
@@ -103,6 +110,11 @@ class User extends Authenticatable
     {
         if (!$this->last_seen_at) return false;
         return $this->last_seen_at->gt(now()->subMinutes(5));
+    }
+
+    public function getIsOnlineAttribute()
+    {
+        return $this->isOnline();
     }
 
     public function isFollowedBy(User $user)

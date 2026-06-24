@@ -29,9 +29,7 @@ class ProfileController extends Controller
         });
 
         return Inertia::render('Profile/Show', [
-            'profileUser' => $profileUser->loadCount(['posts', 'followers', 'following' => function ($q) {
-                $q->where('follower_id', Auth::id());
-            }]),
+            'profileUser' => $profileUser->loadCount(['posts', 'followers', 'following']),
             'isOwnProfile' => $isOwnProfile,
             'isFollowing' => $isFollowing,
             'posts' => $posts->items(),

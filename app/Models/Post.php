@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    protected $appends = ['image_url', 'video_url', 'likes_count', 'comments_count'];
+
     protected $fillable = [
         'user_id',
         'content',
