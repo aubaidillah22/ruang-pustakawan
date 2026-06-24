@@ -30,8 +30,9 @@ Route::get('/dashboard', function () {
 
 // Authenticated routes
 Route::middleware(['auth', 'active'])->group(function () {
-    // Feed
+    // Feed & Explore
     Route::get('/feed', [PostController::class, 'index'])->name('feed');
+    Route::get('/explore', [PostController::class, 'explore'])->name('explore');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::post('/posts/update', [PostController::class, 'update'])->name('posts.update');
     Route::post('/posts/delete', [PostController::class, 'destroy'])->name('posts.destroy');
