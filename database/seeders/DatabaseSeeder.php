@@ -14,16 +14,18 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create admin
-        $admin = User::create([
-            'username' => 'admin',
-            'email' => 'admin@ruangpustakawan.app',
-            'password' => 'password123',
-            'fullname' => 'Admin RuangPustakawan',
-            'bio' => 'Administrator platform RuangPustakawan. Pustakawan profesional.',
-            'role' => 'admin',
-            'avatar' => 'default.svg',
-        ]);
+        // Create admin (use firstOrCreate to avoid duplicate errors)
+        $admin = User::firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'email' => 'admin@ruangpustakawan.app',
+                'password' => 'password123',
+                'fullname' => 'Admin RuangPustakawan',
+                'bio' => 'Administrator platform RuangPustakawan. Pustakawan profesional.',
+                'role' => 'admin',
+                'avatar' => 'default.svg',
+            ]
+        );
 
         // Create sample users
         $users = collect();
@@ -41,14 +43,16 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($names as $i => [$name, $username, $bio]) {
-            $users->push(User::create([
-                'username' => $username,
-                'email' => $username . '@example.com',
-                'password' => 'password123',
-                'fullname' => $name,
-                'bio' => $bio,
-                'avatar' => 'default.svg',
-            ]));
+            $users->push(User::firstOrCreate(
+                ['username' => $username],
+                [
+                    'email' => $username . '@example.com',
+                    'password' => 'password123',
+                    'fullname' => $name,
+                    'bio' => $bio,
+                    'avatar' => 'default.svg',
+                ]
+            ));
         }
 
         // Create posts

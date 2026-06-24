@@ -67,7 +67,9 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Profile
     Route::get('/profile/{user?}', [ProfileController::class, 'show'])->name('profile.show');
-    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/settings/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile/settings', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])->name('profile.updateAvatar');
 });
 

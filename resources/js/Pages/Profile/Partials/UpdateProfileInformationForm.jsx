@@ -14,7 +14,7 @@ export default function UpdateProfileInformation({
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({
-            name: user.name,
+            name: user.fullname || user.name,
             email: user.email,
         });
 
@@ -37,8 +37,7 @@ export default function UpdateProfileInformation({
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-6">
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                <div>                        <InputLabel htmlFor="name" value="Nama Lengkap" />
 
                     <TextInput
                         id="name"

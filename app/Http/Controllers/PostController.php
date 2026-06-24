@@ -39,6 +39,51 @@ class PostController extends Controller
         ]);
     }
 
+    public function explore()
+    {
+        $currentUser = Auth::user();
+
+        // Trending posts: most liked + most commented
+        $trendingPosts = Post::with('user')
+            ->withCount(['likes', 'comments'])
+            ->orderBy('likes_count', 'desc')
+            ->orderBy('comments_count', 'desc')
+            ->take(10)
+            ->get();
+
+        $trendingPosts->transform(function ($post) use ($currentUser) {
+            $post->is_liked = $post->isLikedBy($currentUser);
+            return $post;
+        });
+
+        // Suggested users to follow (exclude self & already following)
+        $followingIds = \App\Models\Follow::where('follower_id', $currentUser->id)
+            ->pluck('following_id')
+            ->toArray();
+
+        $suggestedUsers = \App\Models\User::where('id', '!=', $currentUser->id)
+            ->whereNotIn('id', $followingIds)
+            ->inRandomOrder()
+            ->take(6)
+            ->get()
+            ->map(function ($u) {
+                return [
+                    'id' => $u->id,
+                    'fullname' => $u->fullname,
+                    'username' => $u->username,
+                    'avatar' => $u->avatar,
+                    'avatar_url' => $u->avatar_url,
+                    'bio' => $u->bio,
+                    'posts_count' => $u->posts()->count(),
+                ];
+            });
+
+        return Inertia::render('Explore', [
+            'trendingPosts' => $trendingPosts,
+            'suggestedUsers' => $suggestedUsers,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

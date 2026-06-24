@@ -19,6 +19,7 @@ class ProfileController extends Controller
         $isFollowing = $isOwnProfile ? false : $profileUser->isFollowedBy($currentUser);
 
         $posts = $profileUser->posts()
+            ->with('user')
             ->withCount(['likes', 'comments'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
@@ -37,25 +38,48 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function edit()
+    {
+        return Inertia::render('Profile/Edit');
+    }
+
     public function update(Request $request)
     {
         $user = Auth::user();
 
-        $request->validate([
-            'fullname' => 'required|string|max:100',
-            'username' => 'required|string|max:50|regex:/^[a-z0-9_]+$/|unique:users,username,' . $user->id,
-            'bio' => 'nullable|string|max:500',
+        $rules = [
             'email' => 'required|email|max:100|unique:users,email,' . $user->id,
-        ], [
+        ];
+
+        // Support both 'fullname' (our custom form) and 'name' (Breeze default form)
+        if ($request->filled('fullname') || $request->filled('name')) {
+            $rules['fullname'] = 'string|max:100';
+        }
+        if ($request->filled('username')) {
+            $rules['username'] = 'required|string|max:50|regex:/^[a-z0-9_]+$/|unique:users,username,' . $user->id;
+        }
+        if ($request->has('bio')) {
+            $rules['bio'] = 'nullable|string|max:500';
+        }
+
+        $request->validate($rules, [
             'username.regex' => 'Username hanya boleh huruf kecil, angka, dan underscore!',
         ]);
 
-        $user->update([
-            'fullname' => trim($request->fullname),
-            'username' => strtolower(trim($request->username)),
-            'bio' => trim($request->bio ?? ''),
-            'email' => trim($request->email),
-        ]);
+        $data = [
+            'fullname' => trim($request->fullname ?? $request->name ?? $user->fullname),
+        ];
+        if ($request->filled('username')) {
+            $data['username'] = strtolower(trim($request->username));
+        }
+        if ($request->has('bio')) {
+            $data['bio'] = trim($request->bio ?? '');
+        }
+        if ($request->filled('email')) {
+            $data['email'] = trim($request->email);
+        }
+
+        $user->update($data);
 
         if ($request->filled('current_password') && $request->filled('new_password')) {
             $request->validate([
@@ -69,6 +93,23 @@ class ProfileController extends Controller
         }
 
         return back()->with('success', 'Profile updated!');
+    }
+
+    public function destroy(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $user = Auth::user();
+
+        Auth::logout();
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
 
     public function updateAvatar(Request $request)
