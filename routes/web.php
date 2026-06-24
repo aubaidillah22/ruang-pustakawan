@@ -23,6 +23,11 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+// Dashboard redirect to feed (Breeze defaults to 'dashboard' after login)
+Route::get('/dashboard', function () {
+    return redirect()->route('feed');
+})->middleware(['auth'])->name('dashboard');
+
 // Authenticated routes
 Route::middleware(['auth', 'active'])->group(function () {
     // Feed
