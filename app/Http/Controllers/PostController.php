@@ -39,29 +39,40 @@ class PostController extends Controller
         ]);
     }
 
-    public function explore()
+    public function explore(Request $request)
     {
         $currentUser = Auth::user();
+        $perPage = 10;
+        $page = max(1, (int) $request->get('page', 1));
 
         // Trending posts: most liked + most commented
-        $trendingPosts = Post::with('user')
+        $posts = Post::with('user')
             ->withCount(['likes', 'comments'])
             ->orderBy('likes_count', 'desc')
             ->orderBy('comments_count', 'desc')
-            ->take(10)
-            ->get();
+            ->paginate($perPage, ['*'], 'page', $page);
 
-        $trendingPosts->transform(function ($post) use ($currentUser) {
+        $posts->getCollection()->transform(function ($post) use ($currentUser) {
             $post->is_liked = $post->isLikedBy($currentUser);
+            $post->can_delete = $post->user_id === $currentUser->id || $currentUser->role === 'admin';
             return $post;
         });
+
+        // AJAX pagination request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'posts' => $posts->items(),
+                'has_more' => $posts->hasMorePages(),
+            ]);
+        }
 
         // Suggested users to follow (exclude self & already following)
         $followingIds = \App\Models\Follow::where('follower_id', $currentUser->id)
             ->pluck('following_id')
             ->toArray();
 
-        $suggestedUsers = \App\Models\User::where('id', '!=', $currentUser->id)
+        $suggestedUsers = \App\Models\User::withCount('posts')
+            ->where('id', '!=', $currentUser->id)
             ->whereNotIn('id', $followingIds)
             ->inRandomOrder()
             ->take(6)
@@ -74,12 +85,13 @@ class PostController extends Controller
                     'avatar' => $u->avatar,
                     'avatar_url' => $u->avatar_url,
                     'bio' => $u->bio,
-                    'posts_count' => $u->posts()->count(),
+                    'posts_count' => $u->posts_count,
                 ];
             });
 
         return Inertia::render('Explore', [
-            'trendingPosts' => $trendingPosts,
+            'trendingPosts' => $posts->items(),
+            'hasMore' => $posts->hasMorePages(),
             'suggestedUsers' => $suggestedUsers,
         ]);
     }

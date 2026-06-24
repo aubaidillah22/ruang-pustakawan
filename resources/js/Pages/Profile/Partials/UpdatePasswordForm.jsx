@@ -47,11 +47,11 @@ export default function UpdatePasswordForm({ className = '' }) {
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">
+                <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                     Update Password
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
                     Ensure your account is using a long, random password to stay
                     secure.
                 </p>
@@ -131,8 +131,8 @@ export default function UpdatePasswordForm({ className = '' }) {
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-gray-600">
-                            Saved.
+                        <p className="text-sm font-medium" style={{ color: '#059669' }}>
+                            ✓ Saved.
                         </p>
                     </Transition>
                 </div>

@@ -16,6 +16,7 @@
     --text-secondary: #64748b;
     --border-color: #e2e8f0;
     --sidebar-width: 280px;
+    --sidebar-collapsed-width: 0px;
 }
 
 .dark {
@@ -24,6 +25,13 @@
     --text-primary: #f1f5f9;
     --text-secondary: #94a3b8;
     --border-color: #334155;
+}
+
+/* Mobile override */
+@media (max-width: 768px) {
+    :root {
+        --sidebar-width: 0px;
+    }
 }
 
 * {
@@ -140,12 +148,35 @@ body {
     transform: translateY(0);
 }
 
+.btn-secondary {
+    @apply px-6 py-2.5 rounded-xl font-medium transition-all duration-200;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    border-color: var(--primary-light);
+    color: var(--primary-light);
+}
+
 .btn-ghost {
     @apply px-4 py-2 rounded-xl font-medium transition-all duration-200;
     color: var(--text-secondary);
 }
 
 .btn-ghost:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary-light);
+}
+
+/* Icon Button */
+.btn-icon {
+    @apply p-2 rounded-xl transition-all duration-200;
+    color: var(--text-secondary);
+}
+
+.btn-icon:hover {
     background: rgba(59, 130, 246, 0.1);
     color: var(--primary-light);
 }
@@ -212,6 +243,68 @@ body {
 @keyframes typing {
     0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
     30% { opacity: 1; transform: translateY(-4px); }
+}
+
+/* Dark mode toggle in sidebar */
+.theme-toggle-btn {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 w-full;
+    color: var(--text-secondary);
+}
+
+.theme-toggle-btn:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary-light);
+}
+
+/* Sidebar collapsed state */
+.sidebar-collapsed .sidebar-link span:not(.badge-text),
+.sidebar-collapsed .theme-toggle-btn span,
+.sidebar-collapsed .sidebar-user-info,
+.sidebar-collapsed .sidebar-logo-text {
+    display: none;
+}
+
+.sidebar-collapsed .sidebar-link {
+    justify-content: center;
+    padding: 12px;
+}
+
+.sidebar-collapsed .theme-toggle-btn {
+    justify-content: center;
+    padding: 12px;
+}
+
+.sidebar-collapsed .sidebar-user-section {
+    justify-content: center;
+    padding: 8px;
+}
+
+.sidebar-collapsed .sidebar-logo {
+    justify-content: center;
+}
+
+/* Mobile sidebar button */
+.sidebar-toggle-mobile {
+    display: flex;
+}
+
+@media (min-width: 1024px) {
+    .sidebar-toggle-mobile {
+        display: none;
+    }
+}
+
+@media (max-width: 1023px) {
+    .sidebar-toggle-desktop {
+        display: none;
+    }
+}
+
+/* Video preview */
+.video-preview-container {
+    @apply mt-3 relative rounded-xl overflow-hidden;
+    background: #000;
+    max-height: 300px;
 }
 
 /* Responsive */

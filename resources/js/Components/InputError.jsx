@@ -2,7 +2,8 @@ export default function InputError({ message, className = '', ...props }) {
     return message ? (
         <p
             {...props}
-            className={'text-sm text-red-600 ' + className}
+            className={'text-sm ' + className}
+            style={{ color: '#ef4444' }}
         >
             {message}
         </p>
