@@ -69,6 +69,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/messages/delete', [MessageController::class, 'destroyMessage'])->name('messages.destroy');
     Route::post('/messages/delete-conversation/{user}', [MessageController::class, 'destroyConversation'])->name('messages.destroyConversation');
     Route::post('/messages/typing', [MessageController::class, 'typing'])->name('messages.typing');
+    Route::get('/messages/conversations/data', [MessageController::class, 'conversations'])->name('messages.conversations');
 
     // Profile
     Route::get('/profile/{user?}', [ProfileController::class, 'show'])->name('profile.show');

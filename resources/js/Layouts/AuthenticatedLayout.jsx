@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import LogoutModal from '@/Components/LogoutModal';
+import FloatingChat from '@/Components/FloatingChat';
 
 export default function AuthenticatedLayout({ children }) {
     const { auth } = usePage().props;
@@ -186,6 +187,9 @@ export default function AuthenticatedLayout({ children }) {
 
             {/* Logout Modal */}
             <LogoutModal show={showLogoutModal} onClose={() => setShowLogoutModal(false)} />
+
+            {/* Floating Chat */}
+            <FloatingChat />
         </div>
     );
 }

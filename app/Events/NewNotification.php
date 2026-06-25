@@ -33,6 +33,7 @@ class NewNotification implements ShouldBroadcast
             'id' => $this->notification->id,
             'type' => $this->notification->type,
             'message' => $this->notification->message,
+            'post_id' => $this->notification->post_id,
             'fullname' => $this->notification->fromUser->fullname ?? 'Unknown',
             'avatar' => $this->notification->fromUser->avatar ?? 'default.svg',
             'time_ago' => $this->notification->created_at?->diffForHumans() ?? '',

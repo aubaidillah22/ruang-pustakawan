@@ -134,7 +134,7 @@ class MessageController extends Controller
                 'user_id' => $request->receiver_id,
                 'from_user_id' => $senderId,
                 'type' => 'message',
-                'message' => substr(trim($request->message ?? '(image)'), 0, 100),
+                'message' => null,
             ]);
             broadcast(new NewNotification($notification))->toOthers();
         } catch (\Throwable $e) {}
@@ -257,5 +257,50 @@ class MessageController extends Controller
         } catch (\Throwable $e) {}
 
         return response()->json(['success' => true]);
+    }
+
+    public function conversations()
+    {
+        $currentUser = Auth::user();
+        $userId = $currentUser->id;
+
+        $conversationUserIds = ChatMessage::where('sender_id', $userId)
+            ->orWhere('receiver_id', $userId)
+            ->selectRaw('CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as contact_id', [$userId])
+            ->distinct()
+            ->pluck('contact_id');
+
+        $conversations = User::whereIn('id', $conversationUserIds)
+            ->get()
+            ->map(function ($user) use ($userId) {
+                $lastMessage = ChatMessage::where(function ($q) use ($userId, $user) {
+                    $q->where('sender_id', $userId)->where('receiver_id', $user->id);
+                })->orWhere(function ($q) use ($userId, $user) {
+                    $q->where('sender_id', $user->id)->where('receiver_id', $userId);
+                })->latest()->first();
+
+                $unreadCount = ChatMessage::where('sender_id', $user->id)
+                    ->where('receiver_id', $userId)
+                    ->where('is_read', false)
+                    ->count();
+
+                return [
+                    'user' => $user,
+                    'last_message' => $lastMessage,
+                    'unread_count' => $unreadCount,
+                    'is_online' => $user->isOnline(),
+                ];
+            })
+            ->sortByDesc(function ($conv) {
+                return $conv['last_message']?->created_at ?? now()->subYear();
+            })
+            ->values();
+
+        return response()->json([
+            'conversations' => $conversations,
+            'unread_count' => ChatMessage::where('receiver_id', $userId)
+                ->where('is_read', false)
+                ->count(),
+        ]);
     }
 }

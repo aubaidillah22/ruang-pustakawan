@@ -50,6 +50,7 @@ export default function Notifications({ notifications: initialNotifs, hasMore: i
                 id: e.id || Date.now(),
                 type: e.type,
                 message: e.message,
+                post_id: e.post_id,
                 from_user: { fullname: e.fullname, avatar: e.avatar },
                 time_ago: 'Baru saja',
                 is_read: false,
@@ -106,7 +107,7 @@ export default function Notifications({ notifications: initialNotifs, hasMore: i
             case 'like': return 'menyukai postingan Anda';
             case 'comment': return 'mengomentari postingan Anda';
             case 'follow': return 'mulai mengikuti Anda';
-            case 'message': return 'mengirim pesan';
+            case 'message': return 'mengirimi Anda pesan';
             default: return 'melakukan sesuatu';
         }
     };
@@ -116,8 +117,8 @@ export default function Notifications({ notifications: initialNotifs, hasMore: i
         switch (notif.type) {
             case 'like':
             case 'comment':
-                // Navigate to the user's profile who liked/commented
-                if (username) return `/profile/${username}`;
+                // Navigate to the post that was liked/commented
+                if (notif.post_id) return `/feed?post=${notif.post_id}`;
                 return '/feed';
             case 'follow':
                 if (username) return `/profile/${username}`;
