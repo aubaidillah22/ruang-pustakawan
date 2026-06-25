@@ -213,8 +213,10 @@ export default function FloatingChat() {
                 onClick={() => setIsOpen(!isOpen)}
                 className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
                 style={{
-                    background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                    boxShadow: isOpen ? '0 0 0 4px rgba(59,130,246,0.3)' : '0 8px 25px rgba(59,130,246,0.4)',
+                    background: 'linear-gradient(135deg, var(--primary-light), var(--primary))',
+                    boxShadow: isOpen
+                        ? '0 0 0 4px rgba(var(--primary-rgb), 0.3)'
+                        : '0 8px 25px rgba(var(--primary-rgb), 0.4)',
                 }}
             >
                 {isOpen ? (
@@ -501,7 +503,7 @@ export default function FloatingChat() {
                                                         </p>
                                                         {conv.unread_count > 0 && (
                                                             <span className="flex-shrink-0 px-1.5 py-0.5 text-[10px] font-bold rounded-full text-white"
-                                                                  style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
+                                                                  style={{ background: 'linear-gradient(135deg, var(--primary-light), var(--primary))' }}>
                                                                 {conv.unread_count > 99 ? '99+' : conv.unread_count}
                                                             </span>
                                                         )}

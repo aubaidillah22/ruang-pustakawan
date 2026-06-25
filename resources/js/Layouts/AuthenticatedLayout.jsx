@@ -3,6 +3,17 @@ import { Link, usePage, router } from '@inertiajs/react';
 import LogoutModal from '@/Components/LogoutModal';
 import FloatingChat from '@/Components/FloatingChat';
 
+const colorThemes = [
+    { id: 'red', color: '#ef4444', label: 'Merah' },
+    { id: 'orange', color: '#f97316', label: 'Jingga' },
+    { id: 'yellow', color: '#eab308', label: 'Kuning' },
+    { id: 'green', color: '#22c55e', label: 'Hijau' },
+    { id: 'blue', color: '#3b82f6', label: 'Biru' },
+    { id: 'pink', color: '#ec4899', label: 'Pink' },
+    { id: 'purple', color: '#a855f7', label: 'Ungu' },
+];
+const themeIds = colorThemes.map(t => t.id);
+
 export default function AuthenticatedLayout({ children }) {
     const { auth } = usePage().props;
     const user = auth.user;
@@ -14,6 +25,9 @@ export default function AuthenticatedLayout({ children }) {
         localStorage.getItem('theme') === 'dark' ||
         (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
     );
+    const [colorTheme, setColorTheme] = useState(
+        localStorage.getItem('accent_theme') || 'blue'
+    );
     const [notifCount, setNotifCount] = useState(0);
     const [msgCount, setMsgCount] = useState(0);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -24,6 +38,13 @@ export default function AuthenticatedLayout({ children }) {
         document.documentElement.classList.toggle('dark', darkMode);
         localStorage.setItem('theme', darkMode ? 'dark' : 'light');
     }, [darkMode]);
+
+    useEffect(() => {
+        // Remove all theme classes
+        themeIds.forEach(id => document.documentElement.classList.remove(`theme-${id}`));
+        document.documentElement.classList.add(`theme-${colorTheme}`);
+        localStorage.setItem('accent_theme', colorTheme);
+    }, [colorTheme]);
 
     useEffect(() => {
         localStorage.setItem('sidebar_collapsed', String(sidebarCollapsed));
@@ -87,7 +108,7 @@ export default function AuthenticatedLayout({ children }) {
                 <div className="p-6 border-b sidebar-logo" style={{ borderColor: 'var(--border-color)' }}>
                     <Link href="/feed" className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
-                             style={{ background: 'linear-gradient(135deg, #1e40af, #3b82f6)' }}>
+                             style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary-light))' }}>
                             RP
                         </div>
                         <div className="sidebar-logo-text">
@@ -152,6 +173,35 @@ export default function AuthenticatedLayout({ children }) {
                             )}
                             <span>{darkMode ? 'Mode Terang' : 'Mode Gelap'}</span>
                         </button>
+                    </div>
+
+                    {/* Color Theme Picker */}
+                    <div className="px-4 pt-2">
+                        <div className="flex items-center gap-1 px-4 py-2 rounded-xl color-theme-picker">
+                            <div className="flex items-center gap-1.5 flex-1">
+                                {colorThemes.map(t => (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => setColorTheme(t.id)}
+                                        className={`w-5 h-5 rounded-full transition-all duration-200 flex items-center justify-center ${colorTheme === t.id ? 'active-theme' : ''}`}
+                                        style={{
+                                            backgroundColor: t.color,
+                                            transform: colorTheme === t.id ? 'scale(1.25)' : 'scale(1)',
+                                            boxShadow: colorTheme === t.id
+                                                ? `0 0 0 2px var(--card-bg), 0 0 0 3px ${t.color}`
+                                                : 'none',
+                                        }}
+                                        title={t.label}
+                                    >
+                                        {colorTheme === t.id && (
+                                            <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
                     {/* User Info */}
