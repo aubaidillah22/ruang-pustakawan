@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 70">
+  <defs>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="pageRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+    <linearGradient id="circleBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Book Icon -->
+  <g transform="translate(5, 5)">
+    <!-- Background circle -->
+    <circle cx="30" cy="30" r="30" fill="url(#circleBg)"/>
+
+    <!-- Left page -->
+    <path d="M16 18 C16 15.5, 18 14, 21 14 L30 14 L30 44 L21 44 C18 44, 16 42.5, 16 40 Z"
+          fill="url(#primaryGrad)"/>
+
+    <!-- Right page -->
+    <path d="M30 14 L39 14 C42 14, 44 15.5, 44 18 L44 40 C44 42.5, 42 44, 39 44 L30 44 Z"
+          fill="url(#pageRight)"/>
+
+    <!-- Spine -->
+    <rect x="28.5" y="14" width="3" height="30" rx="1" fill="#1e3a8a"/>
+
+    <!-- Bookmark -->
+    <path d="M29 16 L29 26 L25.5 23.5 L22 26 L22 16"
+          fill="url(#accentGrad)" stroke="#059669" stroke-width="0.5"/>
+
+    <!-- Page lines left -->
+    <line x1="19" y1="22" x2="27" y2="22" stroke="#ffffff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="19" y1="27" x2="27" y2="27" stroke="#ffffff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="19" y1="32" x2="27" y2="32" stroke="#ffffff" stroke-width="0.8" opacity="0.3"/>
+
+    <!-- Page lines right -->
+    <line x1="33" y1="22" x2="41" y2="22" stroke="#ffffff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="33" y1="27" x2="41" y2="27" stroke="#ffffff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="33" y1="32" x2="41" y2="32" stroke="#ffffff" stroke-width="0.8" opacity="0.3"/>
+  </g>
+
+  <!-- Brand Name -->
+  <text x="75" y="32" font-family="'Segoe UI', 'Inter', system-ui, sans-serif" font-size="21" font-weight="700" fill="#1e3a8a" letter-spacing="-0.5">
+    RuangPustakawan
+  </text>
+
+  <!-- Tagline -->
+  <text x="75" y="52" font-family="'Segoe UI', 'Inter', system-ui, sans-serif" font-size="11" fill="#64748b" font-weight="500">
+    Komunitas Pustakawan
+  </text>
+</svg>

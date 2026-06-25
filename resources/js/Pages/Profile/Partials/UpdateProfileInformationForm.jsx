@@ -115,7 +115,7 @@ export default function UpdateProfileInformation({
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
-                    <div className="rounded-xl p-4" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                    <div className="rounded-xl p-4" style={{ background: 'rgba(var(--primary-rgb), 0.1)', border: '1px solid rgba(var(--primary-rgb), 0.2)' }}>
                         <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
                             Email Anda belum diverifikasi.
                             <Link

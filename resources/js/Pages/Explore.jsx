@@ -52,7 +52,6 @@ export default function Explore({ trendingPosts: initialPosts, hasMore: initialH
     };
 
     const handleDelete = async (postId) => {
-        if (!confirm('Hapus postingan ini?')) return;
         try {
             await axios.post('/posts/delete', { post_id: postId });
             setPosts(prev => prev.filter(p => p.id !== postId));

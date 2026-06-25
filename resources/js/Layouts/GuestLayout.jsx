@@ -4,7 +4,7 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 export default function GuestLayout({ children }) {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center px-4"
-             style={{ background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%)' }}>
+             style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(var(--primary-rgb), 0.2) 0%, rgba(var(--primary-rgb), 0.07) 40%, transparent 80%), linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%)' }}>
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <Link href="/">

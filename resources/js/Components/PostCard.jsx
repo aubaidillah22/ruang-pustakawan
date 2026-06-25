@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from '@inertiajs/react';
 import toast from '@/Components/Toast';
+import DeleteConfirmModal from '@/Components/DeleteConfirmModal';
 
 export default function PostCard({ post, onDelete }) {
     const [liked, setLiked] = useState(post.is_liked || false);
@@ -10,6 +11,10 @@ export default function PostCard({ post, onDelete }) {
     const [commentText, setCommentText] = useState('');
     const [loadingComments, setLoadingComments] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
+
+    // Delete confirmation
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     // Edit state
     const [editing, setEditing] = useState(false);
@@ -137,8 +142,20 @@ export default function PostCard({ post, onDelete }) {
         return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     };
 
+    const handleConfirmDelete = async () => {
+        setDeleting(true);
+        try {
+            await onDelete(post.id);
+        } finally {
+            setDeleting(false);
+            setShowDeleteModal(false);
+        }
+    };
+
     return (
         <>
+            <DeleteConfirmModal show={showDeleteModal} onClose={() => setShowDeleteModal(false)}
+                                onConfirm={handleConfirmDelete} deleting={deleting} />
             <div className="post-card">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">
@@ -180,7 +197,7 @@ export default function PostCard({ post, onDelete }) {
                                         <button onClick={handleEdit}
                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors"
                                                 style={{ color: 'var(--text-primary)' }}
-                                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(59,130,246,0.08)'}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(var(--primary-rgb), 0.08)'}
                                                 onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -189,7 +206,7 @@ export default function PostCard({ post, onDelete }) {
                                         </button>
                                     )}
                                     {post.can_delete && (
-                                        <button onClick={() => { onDelete(post.id); setShowMenu(false); }}
+                                        <button onClick={() => { setShowDeleteModal(true); setShowMenu(false); }}
                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 transition-colors"
                                                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
                                                 onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>

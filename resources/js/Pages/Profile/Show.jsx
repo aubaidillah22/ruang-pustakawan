@@ -28,7 +28,6 @@ export default function ProfileShow({ profileUser, isOwnProfile, isFollowing, po
     };
 
     const handleDelete = async (postId) => {
-        if (!confirm('Hapus postingan ini?')) return;
         try {
             await axios.post('/posts/delete', { post_id: postId });
             setPostsList(prev => prev.filter(p => p.id !== postId));

@@ -104,7 +104,6 @@ export default function Feed({ posts: initialPosts, hasMore: initialHasMore }) {
     };
 
     const handleDelete = async (postId) => {
-        if (!confirm('Hapus postingan ini?')) return;
         try {
             await axios.post('/posts/delete', { post_id: postId });
             setPosts(prev => prev.filter(p => p.id !== postId));

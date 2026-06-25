@@ -90,8 +90,14 @@
 
 body {
     background-color: var(--bg-color);
+    background-image: radial-gradient(ellipse at 50% 0%, rgba(var(--primary-rgb), 0.2) 0%, rgba(var(--primary-rgb), 0.07) 40%, transparent 80%);
+    background-attachment: fixed;
     color: var(--text-primary);
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+    background-image: radial-gradient(ellipse at 50% 0%, rgba(var(--primary-rgb), 0.1) 0%, rgba(var(--primary-rgb), 0.04) 40%, transparent 80%);
 }
 
 /* Glassmorphism Cards */
@@ -175,7 +181,7 @@ body {
 .input-modern:focus {
     outline: none;
     border-color: var(--primary-light);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 /* Button Styles */
@@ -186,7 +192,7 @@ body {
 
 .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
 }
 
 .btn-primary:active {
@@ -211,7 +217,7 @@ body {
 }
 
 .btn-ghost:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(var(--primary-rgb), 0.1);
     color: var(--primary-light);
 }
 
@@ -222,7 +228,7 @@ body {
 }
 
 .btn-icon:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(var(--primary-rgb), 0.1);
     color: var(--primary-light);
 }
 
@@ -297,7 +303,7 @@ body {
 }
 
 .theme-toggle-btn:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(var(--primary-rgb), 0.1);
     color: var(--primary-light);
 }
 
@@ -324,6 +330,11 @@ body {
 .sidebar-collapsed .color-theme-picker {
     justify-content: center;
     padding: 8px;
+}
+
+.sidebar-collapsed .color-theme-picker > div {
+    flex: none;
+    justify-content: center;
 }
 
 .sidebar-collapsed .sidebar-user-section {
@@ -365,12 +376,12 @@ body {
 }
 
 .hover-scale:hover {
-    background: rgba(59, 130, 246, 0.03);
+    background: rgba(var(--primary-rgb), 0.03);
     transform: translateX(4px);
 }
 
 .dark .hover-scale:hover {
-    background: rgba(59, 130, 246, 0.06);
+    background: rgba(var(--primary-rgb), 0.06);
 }
 
 /* Single pulse animation for unread badge */

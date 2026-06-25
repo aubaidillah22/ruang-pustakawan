@@ -187,17 +187,17 @@ export default function Notifications({ notifications: initialNotifs, hasMore: i
                                  className="flex items-start gap-4 px-5 py-4 transition-all duration-200 cursor-pointer"
                                  style={{
                                      background: !notif.is_read
-                                         ? 'rgba(59, 130, 246, 0.05)'
+                                         ? 'rgba(var(--primary-rgb), 0.05)'
                                          : 'transparent',
                                      borderBottom: '1px solid var(--border-color)',
                                  }}
-                                 onMouseEnter={(e) => { e.currentTarget.style.background = !notif.is_read ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.03)'; }}
-                                 onMouseLeave={(e) => { e.currentTarget.style.background = !notif.is_read ? 'rgba(59, 130, 246, 0.05)' : 'transparent'; }}>
+                                 onMouseEnter={(e) => { e.currentTarget.style.background = !notif.is_read ? 'rgba(var(--primary-rgb), 0.1)' : 'rgba(var(--primary-rgb), 0.03)'; }}
+                                 onMouseLeave={(e) => { e.currentTarget.style.background = !notif.is_read ? 'rgba(var(--primary-rgb), 0.05)' : 'transparent'; }}>
                                 {/* Icon */}
                                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                                      style={{
                                          background: !notif.is_read
-                                             ? 'rgba(59, 130, 246, 0.1)'
+                                             ? 'rgba(var(--primary-rgb), 0.1)'
                                              : 'var(--bg-color)',
                                          boxShadow: !notif.is_read
                                              ? '0 0 0 2px var(--primary-light)'
