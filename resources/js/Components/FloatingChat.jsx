@@ -211,7 +211,7 @@ export default function FloatingChat() {
             {/* Floating Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+                className="floating-chat-btn fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
                 style={{
                     background: 'linear-gradient(135deg, var(--primary-light), var(--primary))',
                     boxShadow: isOpen
@@ -229,10 +229,13 @@ export default function FloatingChat() {
                     </svg>
                 )}
                 {!isOpen && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-bold text-white flex items-center justify-center animate-pulse-once"
-                          style={{ background: '#ef4444', boxShadow: '0 2px 8px rgba(239,68,68,0.5)' }}>
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
+                    <>
+                        <span className="pulse-ring" />
+                        <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-bold text-white flex items-center justify-center animate-pulse-once"
+                              style={{ background: '#ef4444', boxShadow: '0 2px 8px rgba(239,68,68,0.5)' }}>
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                    </>
                 )}
             </button>
 
@@ -240,7 +243,7 @@ export default function FloatingChat() {
             {isOpen && (
                 <div
                     ref={panelRef}
-                    className="fixed bottom-24 right-6 z-50 w-[380px] h-[560px] rounded-2xl shadow-2xl border overflow-hidden flex flex-col"
+                    className="chat-panel fixed bottom-24 right-6 z-50 w-[380px] h-[560px] rounded-2xl shadow-2xl border overflow-hidden flex flex-col"
                     style={{
                         background: 'var(--card-bg)',
                         borderColor: 'var(--border-color)',
@@ -248,7 +251,7 @@ export default function FloatingChat() {
                     }}
                 >
                     {/* Header */}
-                    <div className="flex items-center gap-3 px-4 py-3.5 border-b flex-shrink-0"
+                    <div className="chat-header flex items-center gap-3 px-4 py-3.5 border-b flex-shrink-0"
                          style={{ borderColor: 'var(--border-color)', background: 'var(--card-bg)' }}>
                         {selectedUser ? (
                             <>
@@ -415,16 +418,13 @@ export default function FloatingChat() {
                             {/* Search */}
                             <div className="px-4 py-2.5">
                                 <div className="relative">
-                                    <svg className="w-4 h-4 absolute left-3 top-3" style={{ color: 'var(--text-secondary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
                                     <input
                                         ref={searchRef}
                                         type="text"
                                         value={search}
                                         onChange={(e) => handleSearch(e.target.value)}
                                         placeholder="Cari pengguna..."
-                                        className="input-modern pl-9 py-2 text-sm"
+                                        className="input-modern py-2 text-sm"
                                     />
                                     {search && (
                                         <button onClick={() => { setSearch(''); setSearchResults([]); }}
@@ -440,7 +440,7 @@ export default function FloatingChat() {
                                          style={{ background: 'var(--card-bg)', borderColor: 'var(--border-color)' }}>
                                         {searchResults.filter(u => u.id !== currentUserId).map(u => (
                                             <button key={u.id} onClick={() => openChat(u)}
-                                                    className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 text-left"
+                                                    className="chat-conversation-item w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left"
                                                     style={{ borderBottom: '1px solid var(--border-color)' }}>
                                                 <div className="relative">
                                                     <img src={u.avatar_url || `/assets/avatars/${u.avatar || 'default.svg'}`}
@@ -474,7 +474,7 @@ export default function FloatingChat() {
                                     <div className="divide-y" style={{ borderColor: 'var(--border-color)' }}>
                                         {conversations.map(conv => (
                                             <button key={conv.user.id} onClick={() => openChat(conv.user)}
-                                                    className="w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-left"
+                                                    className="chat-conversation-item w-full flex items-center gap-3 py-3 transition-all duration-200 text-left"
                                                     style={{ borderColor: 'var(--border-color)' }}>
                                                 <div className="relative flex-shrink-0">
                                                     <img src={conv.user.avatar_url || `/assets/avatars/${conv.user.avatar || 'default.svg'}`}

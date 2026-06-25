@@ -166,7 +166,7 @@ export default function AuthenticatedLayout({ children }) {
                 </nav>
 
                 {/* Dark Mode Toggle & User Info */}
-                <div className="absolute bottom-0 left-0 right-0 border-t" style={{ borderColor: 'var(--border-color)', background: 'var(--card-bg)' }}>
+                <div className="absolute bottom-0 left-0 right-0 sidebar-footer" style={{ background: 'var(--card-bg)' }}>
                     {/* Dark Mode Toggle */}
                     <div className="px-4 pt-3">
                         <button onClick={() => setDarkMode(!darkMode)}
