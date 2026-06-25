@@ -332,7 +332,7 @@ export default function PostCard({ post, onDelete }) {
                                                         <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{comment.comment}</p>
                                                     </div>
                                                     <p className="text-xs mt-1 ml-2" style={{ color: 'var(--text-secondary)' }}>
-                                                        {comment.time_ago || ''}
+                                                        {timeAgo(comment.created_at)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -350,7 +350,7 @@ export default function PostCard({ post, onDelete }) {
                                                             <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{reply.comment}</p>
                                                         </div>
                                                         <p className="text-xs mt-1 ml-2" style={{ color: 'var(--text-secondary)' }}>
-                                                            {reply.time_ago || ''}
+                                                            {timeAgo(reply.created_at)}
                                                         </p>
                                                     </div>
                                                 </div>

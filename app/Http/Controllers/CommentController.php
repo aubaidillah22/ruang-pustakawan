@@ -87,6 +87,8 @@ class CommentController extends Controller
         if ($diffMinutes < 60) return $diffMinutes . ' menit lalu';
         if ($diffHours < 24) return $diffHours . ' jam lalu';
         if ($diffDays < 7) return $diffDays . ' hari lalu';
-        return $time->format('d M Y');
+
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+        return $time->format('j') . ' ' . $months[$time->month - 1] . ' ' . $time->format('Y');
     }
 }
