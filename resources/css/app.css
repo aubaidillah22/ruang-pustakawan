@@ -81,11 +81,11 @@
 
 * {
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: rgba(var(--primary-rgb), 0.25) transparent;
 }
 
 .dark * {
-    scrollbar-color: #475569 transparent;
+    scrollbar-color: rgba(var(--primary-rgb), 0.35) transparent;
 }
 
 body {
@@ -216,6 +216,19 @@ body {
 
 .btn-primary:active {
     transform: translateY(0);
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0);
+    transition: background 0.3s ease;
+    border-radius: inherit;
+}
+
+.btn-primary:active::after {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .btn-secondary {
@@ -411,6 +424,58 @@ body {
     max-height: 300px;
 }
 
+/* ========== Feature: Heart Pop Animation ========== */
+@keyframes heartPop {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.35); }
+    50% { transform: scale(0.9); }
+    75% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.heart-pop {
+    animation: heartPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes heartFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.3) rotate(20deg);
+    }
+}
+
+.heart-particle {
+    position: absolute;
+    pointer-events: none;
+    animation: heartFloat 0.8s ease-out forwards;
+}
+
+/* ========== Inertia Progress Bar (follows theme) ========== */
+#nprogress .bar {
+    background: linear-gradient(90deg, var(--primary), var(--primary-light)) !important;
+    height: 3px !important;
+    box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.5) !important;
+}
+
+#nprogress .peg {
+    box-shadow: 0 0 10px var(--primary-light), 0 0 5px var(--primary) !important;
+}
+
+#nprogress .spinner-icon {
+    border-top-color: var(--primary-light) !important;
+    border-left-color: var(--primary-light) !important;
+}
+
+/* ========== Feature: Ripple Effect for Buttons ========== */
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
 /* Hover scale effect for list items */
 .hover-scale {
     transition: all 0.2s ease;
@@ -436,14 +501,122 @@ body {
     100% { transform: scale(1); }
 }
 
-/* Lightbox backdrop */
-.lightbox-backdrop {
-    animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
+/* ========== Enhanced Lightbox ========== */
+@keyframes lightboxOverlayIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+@keyframes lightboxOverlayOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes lightboxMediaIn {
+    from {
+        opacity: 0;
+        transform: scale(0.85) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes lightboxMediaOut {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+    }
+}
+
+@keyframes lightboxHeaderIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes lightboxFooterIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes lightboxZoomIn {
+    from { transform: scale(1); }
+    to { transform: scale(2.5); }
+}
+
+.lightbox-overlay {
+    animation: lightboxOverlayIn 0.3s ease-out forwards;
+}
+
+.lightbox-overlay.closing {
+    animation: lightboxOverlayOut 0.25s ease-in forwards;
+}
+
+.lightbox-media {
+    animation: lightboxMediaIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.lightbox-media.closing {
+    animation: lightboxMediaOut 0.2s ease-in forwards;
+}
+
+.lightbox-header {
+    animation: lightboxHeaderIn 0.35s ease-out 0.1s both;
+}
+
+.lightbox-footer {
+    animation: lightboxFooterIn 0.35s ease-out 0.15s both;
+}
+
+.lightbox-btn {
+    @apply flex items-center justify-center rounded-full transition-all duration-200;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(4px);
+    color: white;
+}
+
+.lightbox-btn:hover {
+    background: rgba(255,255,255,0.18);
+    transform: scale(1.05);
+}
+
+.lightbox-btn:active {
+    transform: scale(0.95);
+}
+
+.lightbox-glass {
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.lightbox-caption {
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+}
+
+/* Zoom indicator badge */
+.zoom-badge {
+    @apply px-2 py-0.5 rounded-full text-xs font-medium;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    color: rgba(255,255,255,0.8);
+    pointer-events: none;
 }
 
 /* Emoji picker scrollbar */

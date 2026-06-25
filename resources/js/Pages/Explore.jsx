@@ -88,7 +88,6 @@ export default function Explore({ trendingPosts: initialPosts, hasMore: initialH
                                         <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>{u.fullname}</p>
                                     </Link>
                                     <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>@{u.username}</p>
-                                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{u.posts_count} postingan</p>
                                 </div>
                                 <button onClick={() => handleFollow(u.id)}
                                         className="btn-primary text-xs px-4 py-1.5 whitespace-nowrap">

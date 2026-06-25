@@ -2,10 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from '@inertiajs/react';
 import toast from '@/Components/Toast';
 import DeleteConfirmModal from '@/Components/DeleteConfirmModal';
+import LightboxMedia from '@/Components/LightboxMedia';
 
 export default function PostCard({ post, onDelete }) {
     const [liked, setLiked] = useState(post.is_liked || false);
     const [likeCount, setLikeCount] = useState(post.likes_count || 0);
+    const [heartPop, setHeartPop] = useState(false);
+    const [heartParticles, setHeartParticles] = useState([]);
+    const likeBtnRef = useRef(null);
     const [comments, setComments] = useState([]);
     const [showComments, setShowComments] = useState(false);
     const [commentText, setCommentText] = useState('');
@@ -21,8 +25,10 @@ export default function PostCard({ post, onDelete }) {
     const [editContent, setEditContent] = useState(post.content || '');
     const [saving, setSaving] = useState(false);
 
-    // Lightbox state
+        // Lightbox state
     const [lightbox, setLightbox] = useState(null);
+    const [lightboxClosing, setLightboxClosing] = useState(false);
+    const [lightboxInfo, setLightboxInfo] = useState(null);
 
     const editRef = useRef(null);
 
@@ -41,17 +47,43 @@ export default function PostCard({ post, onDelete }) {
         if (editing) editRef.current?.focus();
     }, [editing]);
 
+    const spawnHeartParticles = () => {
+        const colors = ['#ef4444', '#f97316', '#ec4899', '#f43f5e', '#fb7185'];
+        const newParticles = Array.from({ length: 6 }, (_, i) => ({
+            id: Date.now() + i,
+            x: 10 + (i * 12) - 30,
+            delay: i * 0.05,
+            color: colors[i % colors.length],
+            size: 6 + Math.random() * 6,
+        }));
+        setHeartParticles(prev => [...prev, ...newParticles]);
+        setTimeout(() => {
+            setHeartParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
+        }, 900);
+    };
+
     const handleLike = async () => {
+        const wasLiked = liked;
         setLiked(!liked);
         setLikeCount(prev => liked ? prev - 1 : prev + 1);
+        if (!wasLiked) {
+            setHeartPop(true);
+            spawnHeartParticles();
+            setTimeout(() => setHeartPop(false), 450);
+        }
         try {
             const res = await axios.post('/like', { post_id: post.id });
             if (res.data.success) {
                 setLiked(res.data.liked);
                 setLikeCount(res.data.like_count);
+                if (res.data.liked && !wasLiked) {
+                    setHeartPop(true);
+                    spawnHeartParticles();
+                    setTimeout(() => setHeartPop(false), 450);
+                }
             }
         } catch {
-            setLiked(liked);
+            setLiked(wasLiked);
             setLikeCount(likeCount);
         }
     };
@@ -125,8 +157,36 @@ export default function PostCard({ post, onDelete }) {
     // Lightbox
     const openLightbox = (type, src) => {
         setLightbox({ type, src });
+        setLightboxInfo({ type, src });
     };
-    const closeLightbox = () => setLightbox(null);
+    const closeLightbox = () => {
+        setLightboxClosing(true);
+        setTimeout(() => {
+            setLightbox(null);
+            setLightboxClosing(false);
+            setLightboxInfo(null);
+        }, 280);
+    };
+
+    // Keyboard support for lightbox
+    useEffect(() => {
+        if (!lightbox) return;
+        const handleKey = (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        };
+        document.addEventListener('keydown', handleKey);
+        return () => document.removeEventListener('keydown', handleKey);
+    }, [lightbox]);
+
+    // Prevent body scroll when lightbox is open
+    useEffect(() => {
+        if (lightbox) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [lightbox]);
 
     const timeAgo = (timestamp) => {
         if (!timestamp) return '';
@@ -290,13 +350,31 @@ export default function PostCard({ post, onDelete }) {
                 {/* Actions */}
                 {!editing && (
                     <div className="flex items-center gap-6 pt-3 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                        <button onClick={handleLike} className={`flex items-center gap-2 text-sm transition-all duration-200 ${
-                            liked ? 'text-red-500' : ''
-                        }`} style={{ color: liked ? '' : 'var(--text-secondary)' }}>
-                            <svg className="w-5 h-5" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
+                        <button ref={likeBtnRef} onClick={handleLike}
+                            className={`flex items-center gap-2 text-sm relative transition-all duration-200 ${
+                                liked ? 'text-red-500' : ''
+                            }`} style={{ color: liked ? '' : 'var(--text-secondary)' }}>
+                            <span className="relative inline-flex">
+                                <svg className={`w-5 h-5 ${heartPop ? 'heart-pop' : ''}`}
+                                     fill={liked ? 'currentColor' : 'none'}
+                                     stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                {heartParticles.map(p => (
+                                    <span key={p.id}
+                                          className="heart-particle"
+                                          style={{
+                                              left: p.x,
+                                              top: 0,
+                                              width: p.size,
+                                              height: p.size,
+                                              background: p.color,
+                                              borderRadius: '50%',
+                                              animationDelay: `${p.delay}s`,
+                                          }} />
+                                ))}
+                            </span>
                             <span>{likeCount}</span>
                         </button>
 
@@ -396,57 +474,152 @@ export default function PostCard({ post, onDelete }) {
                 )}
             </div>
 
-            {/* Lightbox Overlay */}
-            {lightbox && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-                     style={{ background: 'rgba(0,0,0,0.92)' }}
-                     onClick={closeLightbox}>
-                    {/* Close button */}
-                    <button onClick={closeLightbox}
-                            className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all z-10">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+            {/* Full-screen Lightbox Overlay */}
+            {(lightbox || lightboxClosing) && (
+                <div style={{
+                         position: 'fixed',
+                         top: 0,
+                         left: 0,
+                         right: 0,
+                         bottom: 0,
+                         width: '100%',
+                         height: '100%',
+                         zIndex: 100,
+                         display: 'flex',
+                         flexDirection: 'column',
+                         background: 'rgba(0,0,0,0.92)',
+                         animation: lightboxClosing ? 'lightboxOverlayOut 0.25s ease-in forwards' : 'lightboxOverlayIn 0.3s ease-out forwards',
+                         overflow: 'hidden',
+                     }}
+                     onClick={closeLightbox}
+                     onMouseDown={(e) => {
+                         if (lightboxClosing) return;
+                         const overlay = e.currentTarget;
+                         const startY = e.clientY;
+                         const media = overlay.querySelector('.lightbox-media-container');
+                         const handleMouseMove = (ev) => {
+                             const diff = ev.clientY - startY;
+                             if (diff > 0 && media) {
+                                 media.style.transform = `translateY(${diff}px) scale(${Math.max(0.7, 1 - diff/600)})`;
+                                 media.style.opacity = Math.max(0, 1 - diff/400);
+                                 overlay.style.background = `rgba(0,0,0,${Math.max(0.3, 0.92 - diff/500)})`;
+                             }
+                         };
+                         const handleMouseUp = (ev) => {
+                             const diff = ev.clientY - startY;
+                             document.removeEventListener('mousemove', handleMouseMove);
+                             document.removeEventListener('mouseup', handleMouseUp);
+                             if (media) {
+                                 media.style.transform = '';
+                                 media.style.opacity = '';
+                             }
+                             overlay.style.background = 'rgba(0,0,0,0.92)';
+                             if (diff > 120) closeLightbox();
+                         };
+                         document.addEventListener('mousemove', handleMouseMove);
+                         document.addEventListener('mouseup', handleMouseUp);
+                     }}>
 
-                    {/* Counter/Info */}
-                    <div className="absolute top-4 left-4 text-white/60 text-sm">
-                        {lightbox.type === 'image' ? 'Foto' : 'Video'}
+                    {/* Glass Header - no animation transform */}
+                    <div style={{
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '12px 20px',
+                        background: 'rgba(0,0,0,0.4)',
+                        backdropFilter: 'blur(16px)',
+                        WebkitBackdropFilter: 'blur(16px)',
+                        borderBottom: '1px solid rgba(255,255,255,0.06)',
+                        animation: lightboxClosing ? '' : 'lightboxHeaderIn 0.2s ease-out forwards',
+                    }}>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 text-white/80">
+                                {(lightbox?.type || lightboxInfo?.type) === 'image' ? (
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                )}
+                                <span className="text-sm font-medium">
+                                    {(lightbox?.type || lightboxInfo?.type) === 'image' ? 'Foto' : 'Video'}
+                                </span>
+                            </div>
+                            <span className="text-white/30 text-sm">·</span>
+                            <span className="text-white/50 text-xs">
+                                {(lightbox?.type || lightboxInfo?.type) === 'image' ? 'Scroll untuk zoom' : ''}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <a href={lightbox?.src} download
+                               onClick={(e) => e.stopPropagation()}
+                               className="lightbox-btn w-9 h-9">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </a>
+                            <button onClick={closeLightbox}
+                                    className="lightbox-btn w-9 h-9 hover:bg-red-500/30 hover:text-red-300">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Media */}
-                    <div className="max-w-full max-h-full flex items-center justify-center"
-                         onClick={(e) => e.stopPropagation()}>
-                        {lightbox.type === 'image' ? (
-                            <img src={lightbox.src} alt="Full size"
-                                 className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl"
-                                 style={{ animation: 'fadeIn 0.3s ease-out' }} />
-                        ) : (
-                            <video controls autoPlay className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl"
-                                   style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                                <source src={lightbox.src} />
-                            </video>
+                    {/* Media with zoom/pan support */}
+                    <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+                        {lightbox && (
+                            <LightboxMedia 
+                                type={lightbox.type}
+                                src={lightbox.src}
+                                onClose={closeLightbox}
+                                closing={lightboxClosing}
+                            />
                         )}
                     </div>
 
-                    {/* Download button */}
-                    <a href={lightbox.src} download
-                       onClick={(e) => e.stopPropagation()}
-                       className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </a>
+                    {/* Bottom caption */}
+                    {post.content && lightbox && (
+                        <div style={{
+                            flexShrink: 0,
+                            padding: '16px 24px',
+                            background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                            animation: lightboxClosing ? '' : 'lightboxFooterIn 0.35s ease-out 0.15s both',
+                        }}>
+                            <div className="flex items-start gap-3">
+                                <img
+                                    src={post.user?.avatar_url || `/assets/avatars/${post.user?.avatar || 'default.svg'}`}
+                                    alt={post.user?.fullname}
+                                    className="w-8 h-8 rounded-full object-cover ring-2 ring-white/20 flex-shrink-0"
+                                />
+                                <div className="min-w-0">
+                                    <p className="text-white/90 font-medium text-sm">
+                                        {post.user?.fullname || 'Unknown'}
+                                    </p>
+                                    <p className="text-white/60 text-sm mt-0.5 line-clamp-2">
+                                        {post.content}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Keyboard hint */}
+                    {!lightboxClosing && (
+                        <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', paddingBottom: '12px' }}>
+                            <span className="px-3 py-1.5 rounded-full text-[11px] text-white/30"
+                                  style={{ background: 'rgba(255,255,255,0.06)' }}>
+                                Tekan ESC untuk tutup
+                            </span>
+                        </div>
+                    )}
                 </div>
             )}
-
-            {/* Lightbox Animation */}
-            <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: scale(0.95); }
-                    to { opacity: 1; transform: scale(1); }
-                }
-            `}</style>
         </>
     );
 }

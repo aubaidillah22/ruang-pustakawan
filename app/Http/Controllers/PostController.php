@@ -79,8 +79,7 @@ class PostController extends Controller
             ->pluck('following_id')
             ->toArray();
 
-        $suggestedUsers = \App\Models\User::withCount('posts')
-            ->where('id', '!=', $currentUser->id)
+        $suggestedUsers = \App\Models\User::where('id', '!=', $currentUser->id)
             ->whereNotIn('id', $followingIds)
             ->inRandomOrder()
             ->take(6)
@@ -92,8 +91,6 @@ class PostController extends Controller
                     'username' => $u->username,
                     'avatar' => $u->avatar,
                     'avatar_url' => $u->avatar_url,
-                    'bio' => $u->bio,
-                    'posts_count' => $u->posts_count,
                 ];
             });
 
@@ -108,8 +105,8 @@ class PostController extends Controller
     {
         $request->validate([
             'content' => 'nullable|string|max:10000',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:10240',
-            'video' => 'nullable|mimes:mp4,webm,ogg,mov,avi|max:51200',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp',
+            'video' => 'nullable|mimes:mp4,webm,ogg,mov,avi',
         ]);
 
         $content = trim($request->content ?? '');
